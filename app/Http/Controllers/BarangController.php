@@ -7,11 +7,19 @@ use Illuminate\Http\Request;
 
 class BarangController extends Controller
 {
-    public function index()
-    {
-        $barangs = Barang::all();
-        return view('barang.index', compact('barangs'));
+    public function index(Request $request)
+{
+    $query = Barang::query();
+
+    // Jika ada pencarian
+    if ($request->has('search') && $request->search != '') {
+        $query->where('nama_barang', 'like', '%' . $request->search . '%');
     }
+
+    $barangs = $query->orderBy('nama_barang')->get();
+
+    return view('barang.index', compact('barangs'));
+}
 
     public function create()
     {
@@ -29,7 +37,7 @@ class BarangController extends Controller
     $barang = $barang->map(function($b){
         return [
             'id' => $b->id,
-            'nama' => $b->nama_barang, 
+            'nama_barang' => $b->nama_barang, 
             'harga' => $b->harga,
             'stok' => $b->stok
         ];
@@ -37,20 +45,20 @@ class BarangController extends Controller
 
     return response()->json($barang);
 }
-
     public function store(Request $request)
     {
         $request->validate([
-            'nama_barang' => 'required',
-            'stok'        => 'required|integer',
-            'harga'       => 'required|integer',
+            'nama_barang' => 'required|string|max:255',
+            'stok' => 'required|integer|min:0',
+            'satuan' => 'required|string|in:pcs,lusin,rol',
+            'harga_satuan' => 'required|numeric|min:0',
         ]);
 
         Barang::create([
             'nama_barang' => $request->nama_barang,
-            'stok'        => $request->stok,
-            'harga'       => $request->harga,
-            'kategori'    => 'Umum',
+            'stok' => $request->stok,
+            'satuan' => $request->satuan,
+            'harga' => $request->harga_satuan,
         ]);
 
         return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan');

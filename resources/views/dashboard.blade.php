@@ -1,180 +1,205 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
 
-    <h3 class="mb-4 text-left fw-bold text-black">
-        <i class="bi bi-house-door-fill me-2"></i> Dashboard <span class="text-dark">SmartKasir</span>
-    </h3>
+<style>
+/* ========================
+   FINANCIAL DASHBOARD
+======================== */
 
-    <!-- Statistik -->
-    <div class="row text-center mb-4 g-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm py-3 hover-card">
-                <div class="card-body">
-                    <h6 class="text-secondary mb-1">
-                        <i class="bi bi-box-seam me-1"></i> Total Barang
-                    </h6>
-                    <h3 class="fw-bold text-black">{{ $totalBarang }}</h3>
-                </div>
+.finance-card {
+    border-radius: 18px;
+    padding: 22px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    transition: 0.25s ease;
+    margin-bottom: 20px;
+    width: 100%;
+    /* sesuaikan col */
+    text-align: center;
+    /* teks di tengah */
+}
+
+.finance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.25);
+}
+
+.finance-card::after {
+    content: "";
+    position: absolute;
+    top: -20%;
+    right: -25%;
+    width: 140px;
+    height: 140px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    filter: blur(10px);
+}
+
+.bg-income {
+    background: linear-gradient(135deg, #1F3A5F, #284d78);
+}
+
+.bg-transaksi {
+    background: linear-gradient(135deg, #F47C20, #d96b1c);
+}
+
+.bg-barang {
+    background: linear-gradient(135deg, #37475A, #41556b);
+}
+
+.finance-card h4 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.finance-card .value {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* ========================
+   CARD + TABLE CLEAN UI
+======================== */
+
+.card {
+    border-radius: 14px !important;
+}
+
+.card-body {
+    padding: 22px !important;
+}
+
+.table thead {
+    background: #ECECEC;
+}
+
+/* ========================
+       ANIMATION
+======================== */
+.fade-in {
+    animation: fadeIn 0.45s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="container mt-4 fade-in">
+    <!-- CARD UTAMA DI TENGAH -->
+    <div class="row g-3 justify-content-center">
+        <!-- Total Pendapatan -->
+        <div class="col-12 col-md-4">
+            <div class="finance-card bg-income shadow">
+                <h4>Total Pendapatan</h4>
+                <div class="value">Rp {{ number_format($pendapatan,0,',','.') }}</div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm py-3 hover-card">
-                <div class="card-body">
-                    <h6 class="text-secondary mb-1">
-                        <i class="bi bi-receipt-cutoff me-1"></i> Total Transaksi
-                    </h6>
-                    <h3 class="fw-bold text-black">{{ $totalTransaksi }}</h3>
-                </div>
+        <!-- Total Transaksi -->
+        <div class="col-12 col-md-4">
+            <div class="finance-card bg-transaksi shadow">
+                <h4>Total Transaksi</h4>
+                <div class="value">{{ $totalTransaksi }}</div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm py-3 hover-card">
-                <div class="card-body">
-                    <h6 class="text-secondary mb-1">
-                        <i class="bi bi-cash-stack me-1"></i> Total Pendapatan
-                    </h6>
-                    <h3 class="fw-bold text-black">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
-                </div>
+        <!-- Total Barang -->
+        <div class="col-12 col-md-4">
+            <div class="finance-card bg-barang shadow">
+                <h4>Total Barang</h4>
+                <div class="value">{{ $totalBarang }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Grafik -->
-    <div class="row g-4">
-        <!-- Grafik Pendapatan Harian  -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm p-4">
-                <h5 class="mb-3 text-center text-black fw-semibold">
-                    <i class="bi bi-calendar-week me-2"></i> Pendapatan 7 Hari Terakhir
-                </h5>
-                <canvas id="pendapatanChart" height="180"></canvas>
+    <!-- GRAFIK & TRANSAKSI TERBARU -->
+    <div class="row mt-4">
+        <!-- Grafik Pendapatan -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">Grafik Pendapatan Bulanan</h5>
+                    <canvas id="incomeChart" height="140"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- Grafik Barang Terlaris  -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm p-4">
-                <h5 class="mb-3 text-center text-black fw-semibold">
-                    <i class="bi bi-fire me-2"></i> Barang Terjual Terbanyak
-                </h5>
-                <canvas id="barangChart" height="180"></canvas>
+        <!-- Transaksi Terbaru -->
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mt-3 mt-lg-0">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">Transaksi Terbaru</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tgl</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recent as $tr)
+                            <tr>
+                                <td>{{ $tr->created_at->format('d/m H:i') }}</td>
+                                <td>Rp {{ number_format($tr->total,0,',','.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-        #pendapatanChart, #barangChart {
-            opacity: 0;
-            transition: all 1s ease;
-            transform: scale(0.95);
-            filter: drop-shadow(0 0 0px rgba(0,0,0,0.2));
-        }
-        #pendapatanChart.active, #barangChart.active {
-            opacity: 1;
-            transform: scale(1);
-            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
-        }
-    `;
-    document.head.appendChild(style);
-
-    const ctxPendapatan = document.getElementById('pendapatanChart');
-    const pendapatanChart = new Chart(ctxPendapatan, {
-        type: 'bar',
-        data: {
-            labels: @json($labels ?? []),
-            datasets: [{
-                label: 'Total Pendapatan (Rp)',
-                data: @json($data ?? []),
-                backgroundColor: 'rgba(54, 162, 235, 0.9)',
-                borderRadius: 8
-            }]
+var ctx = document.getElementById('incomeChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: @json($chartLabel),
+        datasets: [{
+            label: "Pendapatan",
+            data: @json($chartData),
+            borderWidth: 3,
+            tension: 0.35,
+            borderColor: "#F47C20",
+            pointBackgroundColor: "#F47C20"
+        }]
+    },
+    options: {
+        plugins: {
+            legend: {
+                display: false
+            }
         },
-        options: {
-            animation: {
-                duration: 1800,
-                easing: 'easeOutBounce',
-                onComplete: () => ctxPendapatan.classList.add('active')
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: value => 'Rp ' + value.toLocaleString('id-ID')
-                    }
+        scales: {
+            y: {
+                grid: {
+                    color: "rgba(0,0,0,0.15)"
                 }
             },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: ctx => 'Rp ' + ctx.parsed.y.toLocaleString('id-ID')
-                    }
-                },
-                legend: {
+            x: {
+                grid: {
                     display: false
                 }
             }
         }
-    });
-
-    const ctxBarang = document.getElementById('barangChart');
-    const barangChart = new Chart(ctxBarang, {
-        type: 'doughnut',
-        data: {
-            labels: @json($barangLabels ?? []),
-            datasets: [{
-                label: 'Jumlah Terjual',
-                data: @json($barangData ?? []),
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            rotation: 0,
-            cutout: '65%',
-            animation: {
-                duration: 2200,
-                easing: 'easeInOutElastic',
-                animateRotate: true,
-                animateScale: true,
-                onComplete: () => ctxBarang.classList.add('active')
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.label}: ${ctx.parsed} terjual`
-                    }
-                },
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
+    }
 });
 </script>
-
-<style>
-.hover-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.hover-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-</style>
 
 @endsection

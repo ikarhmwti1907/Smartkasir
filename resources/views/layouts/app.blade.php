@@ -10,12 +10,42 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
-    body {
-        background-color: #FFFFFF;
-        margin: 0;
-        font-family: sans-serif;
+    :root {
+        --bg: #F8F9FA;
+        --text: #000;
+        --card: #FFF;
+        --border: #DDD;
+        --sidebar: #1F3A5F;
+        --navbar: #F47C20;
+        --hover: #F47C20;
+        --input-bg: #FFF;
+        --input-text: #000;
+        --input-border: #CCC;
+        --modal-bg: #FFF;
+        --modal-text: #000;
     }
 
+    body.bg-dark {
+        --bg: #121212;
+        --text: #E5E5E5;
+        --card: #1E1E1E;
+        --border: #333;
+        --sidebar: #1A1A1A;
+        --navbar: #1F2937;
+        --hover: #333;
+        --input-bg: #2B2B2B;
+        --input-text: #FFF;
+        --input-border: #444;
+        --modal-bg: #1F1F1F;
+        --modal-text: #EEE;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', sans-serif;
+        transition: 0.3s ease all;
+    }
 
     .sidebar {
         width: 230px;
@@ -23,88 +53,139 @@
         top: 0;
         left: 0;
         height: 100%;
-        background-color: #1F3A5F;
-        color: white;
+        background: var(--sidebar);
+        color: #FFF;
         padding-top: 20px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.3s ease-in-out;
-        z-index: 1000;
+        transition: 0.3s;
+        z-index: 1101;
+    }
+
+    .sidebar .logo {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .logo img {
+        width: 80px;
+        border-radius: 50%;
+    }
+
+    .sidebar .menu {
+        flex: 1;
+    }
+
+    .sidebar .menu h6 {
+        padding: 10px 20px;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #ccc;
     }
 
     .sidebar a {
-        display: block;
         color: #FFF;
-        padding: 10px 20px;
+        padding: 12px 20px;
+        display: block;
         text-decoration: none;
-        font-size: 15px;
-        transition: all 0.3s;
+        transition: 0.25s;
     }
 
     .sidebar a:hover {
-        background-color: #F47C20;
-        padding-left: 30px;
+        background: var(--hover);
+        padding-left: 28px;
+    }
+
+    .sidebar .bottom-menu a,
+    .btn-logout {
+        padding: 10px 20px;
+        width: 100%;
     }
 
     .navbar-custom {
-        background-color: #F47C20;
+        background: var(--navbar);
         position: fixed;
         top: 0;
         left: 230px;
         width: calc(100% - 230px);
-        z-index: 900;
-    }
-
-    .navbar-brand {
-        color: white !important;
-        font-weight: bold;
-    }
-
-    .toggle-btn {
-        display: none;
-        font-size: 26px;
-        cursor: pointer;
-        color: white;
-        font-weight: bold;
+        z-index: 1000;
+        transition: 0.3s;
+        padding: 12px 20px;
     }
 
     .main-content {
         margin-left: 230px;
         padding: 80px 20px 20px;
-        z-index: auto !important;
-        position: static !important;
+        min-height: 100vh;
+        transition: 0.3s;
     }
 
-    .modal-backdrop {
-        z-index: 3000 !important;
+    .card {
+        background: var(--card) !important;
+        color: var(--text);
+        border-color: var(--border) !important;
     }
 
-    .modal {
-        z-index: 4000 !important;
+    .table {
+        color: var(--text);
+    }
+
+    input,
+    select,
+    textarea {
+        background: var(--input-bg) !important;
+        color: var(--input-text) !important;
+        border-color: var(--input-border) !important;
     }
 
     .modal-content {
-        z-index: 5000 !important;
+        background: var(--modal-bg) !important;
+        color: var(--modal-text);
+    }
+
+    .modal-header,
+    .modal-footer {
+        border-color: var(--border) !important;
+    }
+
+    .btn {
+        transition: 0.25s;
+    }
+
+    .btn-primary {
+        background: var(--navbar);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.85;
     }
 
     .btn-logout {
-        background-color: #1F3A5F;
-        color: white;
+        background: var(--sidebar);
         border: none;
-        width: 100%;
-        padding: 10px;
-        text-align: left;
-        transition: all 0.3s;
+        color: #FFF;
+        transition: 0.3s;
     }
 
     .btn-logout:hover {
-        background-color: #F47C20;
-        padding-left: 25px;
+        background: var(--hover);
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
+    /* Hamburger toggle */
+    .toggle-btn {
+        font-size: 26px;
+        cursor: pointer;
+        display: none;
+        color: white;
+    }
+
+    @media (max-width: 992px) {
+        .toggle-btn {
+            display: block;
+        }
+
         .sidebar {
             transform: translateX(-230px);
         }
@@ -121,63 +202,79 @@
         .main-content {
             margin-left: 0;
         }
+    }
 
-        .toggle-btn {
-            display: inline-block;
-        }
+    /* Overlay */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 1000;
+    }
+
+    /* Navbar dark mode fix */
+    body.bg-dark .navbar-custom {
+        background-color: var(--navbar) !important;
+    }
+
+    body.bg-dark .sidebar {
+        background-color: var(--sidebar) !important;
+    }
+
+    body.bg-dark .navbar-brand,
+    body.bg-dark .navbar a {
+        color: #fff !important;
     }
     </style>
 </head>
 
-<body>
+<body class="{{ auth()->user()->settings['theme'] ?? 'light' === 'dark' ? 'bg-dark' : '' }}">
+    <div class="overlay" id="overlay"></div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-
         <div>
-            <div class="logo text-center">
-                <img src="{{ asset('images/logo.jpg') }}" width="80" alt="Logo SmartKasir">
+            <div class="logo">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo">
                 <h5>SmartKasir</h5>
             </div>
 
             <div class="menu">
-                <a href="{{ url('/dashboard') }}">
-                    <i class="bi bi-house-door-fill me-2"></i> Dashboard
-                </a>
+                <h6>Menu Utama</h6>
+                <a href="/dashboard"><i class="bi bi-house-door-fill me-2"></i> Dashboard</a>
+                <a href="/barang"><i class="bi bi-box-seam me-2"></i> Kelola Barang</a>
+                <a href="/transaksi"><i class="bi bi-cash-stack me-2"></i> Transaksi</a>
 
-                <a href="{{ url('/barang') }}">
-                    <i class="bi bi-box-seam me-2"></i> Kelola Barang
-                </a>
+                <h6>Laporan</h6>
+                <a href="/laporan/barang"><i class="bi bi-clipboard-data me-2"></i> Laporan Barang</a>
+                <a href="/laporan/transaksi"><i class="bi bi-bar-chart-line me-2"></i> Laporan Transaksi</a>
 
-                <a href="{{ url('/transaksi') }}">
-                    <i class="bi bi-cash-stack me-2"></i> Transaksi
-                </a>
-
-                <a href="{{ url('/laporan/barang') }}">
-                    <i class="bi bi-clipboard-data me-2"></i> Laporan Barang
-                </a>
-
-                <a href="{{ url('/laporan/transaksi') }}">
-                    <i class="bi bi-bar-chart-line me-2"></i> Laporan Transaksi
-                </a>
+                <h6>Akun</h6>
+                <a href="{{ route('profile.index') }}"><i class="bi bi-person-circle me-2"></i> Profil</a>
             </div>
         </div>
 
-        <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
-            <i class="bi bi-box-arrow-right me-2"></i> Logout
-        </button>
+        <div class="bottom-menu">
+            <button class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </button>
+        </div>
     </div>
 
     <!-- Navbar -->
     <nav class="navbar navbar-custom px-4">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <span class="toggle-btn" onclick="toggleSidebar()">
-                <i class="bi bi-list"></i>
-            </span>
-            <span class="navbar-brand mb-0 h4">SmartKasir</span>
-            <span class="text-white">
-                <i class="bi bi-person-fill me-1"></i> Halo, {{ Auth::user()->name ?? 'Kasir' }}
-            </span>
+            <span class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></span>
+            <span class="navbar-brand text-white">SmartKasir</span>
+            <div class="d-flex align-items-center gap-3 text-white">
+                <a href="{{ route('profile.index') }}" class="text-white text-decoration-none">
+                    <i class="bi bi-person-fill me-1"></i> Halo, {{ Auth::user()->name ?? 'Kasir' }}
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -185,24 +282,24 @@
         @yield('content')
     </div>
 
-    <!-- Modal Logout -->
-    <div class="modal fade" id="logoutModal" tabindex="-1">
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+            <div class="modal-content shadow-lg">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Konfirmasi Logout</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
                     <i class="bi bi-box-arrow-right" style="font-size: 60px; color:#dc3545"></i>
-                    <h5 class="mt-3">Yakin ingin keluar dari akun?</h5>
-                    <p class="text-muted">Pastikan semua transaksi telah disimpan sebelum logout.</p>
+                    <h5 class="mt-3">Yakin ingin keluar?</h5>
+                    <p>Pastikan semua transaksi sudah tersimpan.</p>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="btn btn-danger px-4">Ya, Logout</button>
+                        <button class="btn btn-danger">Ya, Logout</button>
                     </form>
                 </div>
             </div>
@@ -210,9 +307,18 @@
     </div>
 
     <script>
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
     function toggleSidebar() {
-        document.getElementById("sidebar").classList.toggle("active");
+        sidebar.classList.toggle("active");
+        overlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
     }
+
+    overlay.onclick = () => {
+        sidebar.classList.remove("active");
+        overlay.style.display = "none";
+    };
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

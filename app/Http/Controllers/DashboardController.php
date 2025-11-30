@@ -10,47 +10,28 @@ use App\Models\Barang;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        // Statistik utama
-        $totalBarang = Barang::count();
-        $totalTransaksi = Transaksi::count();
-        $totalPendapatan = Transaksi::sum('total');
+{
+    $pendapatan = Transaksi::sum('total');
+    $totalTransaksi = Transaksi::count();
+    $totalBarang = Barang::count();
+    $recent = Transaksi::orderBy('id','DESC')->take(5)->get();
 
-        // Grafik pendapatan 7 hari terakhir
-        $transaksiHarian = Transaksi::select(
-                DB::raw('DATE(created_at) as tanggal'),
-                DB::raw('SUM(total) as total_harian')
-            )
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->orderBy(DB::raw('DATE(created_at)'), 'ASC')
-            ->limit(7)
-            ->get();
+    // Data Grafik Pendapatan
+    $chart = Transaksi::selectRaw('MONTH(created_at) as bulan, SUM(total) as total')
+        ->groupBy('bulan')
+        ->pluck('total');
 
-        $labels = $transaksiHarian->pluck('tanggal')->toArray();
-        $data = $transaksiHarian->pluck('total_harian')->toArray();
+    $label = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-        // Barang terlaris (5 besar)
-        $barangTerlaris = DetailTransaksi::select(
-                'barang_id',
-                DB::raw('SUM(jumlah) as total_jual')
-            )
-            ->groupBy('barang_id')
-            ->orderByDesc('total_jual')
-            ->limit(5)
-            ->with('barang')
-            ->get();
+    return view('dashboard', [
+        'pendapatan'   => $pendapatan,
+        'totalTransaksi'=> $totalTransaksi,
+        'totalBarang'  => $totalBarang,
+        'recent'       => $recent,
+        'chartData'    => $chart,
+        'chartLabel'   => $label
+    ]);
+}
 
-        $barangLabels = $barangTerlaris->pluck('barang.nama_barang')->toArray();
-        $barangData = $barangTerlaris->pluck('total_jual')->toArray();
 
-        return view('dashboard', compact(
-            'totalBarang',
-            'totalTransaksi',
-            'totalPendapatan',
-            'labels',
-            'data',
-            'barangLabels',
-            'barangData'
-        ));
-    }
 }

@@ -2,8 +2,6 @@
 
 @section('content')
 <div class="container">
-    <h3>Transaksi Penjualan</h3>
-
     @if(session('error'))
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
