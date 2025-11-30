@@ -1,25 +1,5 @@
 # Smartkasir
 
-Aplikasi Point of Sale (POS) dan Manajemen Toko berbasis Laravel.
-
-## Fitur Utama
-- Manajemen Produk
-- Manajemen Stok
-- Sistem Kasir (POS)
-- Barcode Scanner
-- Laporan Penjualan
-- Multi User (Admin & Kasir)
-- Pembayaran Midtrans
-- Manajemen Pelanggan
-- Keranjang Belanja
-
-## Teknologi
-- Laravel 10
-- PHP 8+
-- MySQL
-- Bootstrap / Tailwind
-- JavaScript
-
 ## Cara Instalasi
 1. Clone repo:
    ```bash
