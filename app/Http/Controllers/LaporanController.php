@@ -4,42 +4,72 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\Transaksi;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
-class LaporanController extends Controller {
-
+class LaporanController extends Controller
+{
+    // ============================
+    // Laporan Data Barang
+    // ============================
     public function laporanBarang(Request $request)
     {
         $bulan = $request->get('bulan', date('Y-m')); // format YYYY-MM
 
-        // Ambil semua barang beserta relasi details yang terfilter per bulan
-        $barangs = Barang::with(['details' => function($q) use ($bulan) {
-            $q->whereHas('transaksi', function($q2) use ($bulan) {
-                $q2->where('tanggal', 'like', $bulan . '%');
-            });
-        }])->get();
+        // Ambil semua barang + hitung jumlah terjual di bulan tersebut
+        $barangs = Barang::leftJoin('detail_transaksis', 'barangs.id', '=', 'detail_transaksis.barang_id')
+            ->leftJoin('transaksis', 'detail_transaksis.transaksi_id', '=', 'transaksis.id')
+            ->select(
+                'barangs.id',
+                'barangs.nama_barang',
+                'barangs.stok',
+                'barangs.harga',
+                DB::raw('
+                    COALESCE(
+                        SUM(
+                            CASE 
+                                WHEN DATE_FORMAT(transaksis.tanggal, "%Y-%m") = "'.$bulan.'" 
+                                THEN detail_transaksis.jumlah 
+                                ELSE 0 
+                            END
+                        ), 0
+                    ) AS jumlahTerjual
+                ')
+            )
+            ->groupBy(
+                'barangs.id',
+                'barangs.nama_barang',
+                'barangs.stok',
+                'barangs.harga'
+            )
+            ->get();
 
-        // Cek apakah ada transaksi di bulan tersebut
-        $adaData = $barangs->sum(function($b) {
-            return $b->details->count();
-        }) > 0;
+        // Pastikan jumlahTerjual integer
+        $barangs->transform(function ($b) {
+            $b->jumlahTerjual = (int) $b->jumlahTerjual;
+            return $b;
+        });
+
+        // Modal hanya muncul kalau tidak ada barang sama sekali
+        $adaData = Transaksi::whereRaw('DATE_FORMAT(tanggal, "%Y-%m") = ?', [$bulan])->exists();
 
         return view('laporan.barang', compact('barangs', 'bulan', 'adaData'));
     }
 
+
+    // ============================
+    // Laporan Transaksi
+    // ============================
     public function transaksi(Request $request)
-{
-    $bulan = $request->get('bulan', date('Y-m')); // format YYYY-MM
+    {
+        $bulan = $request->get('bulan', date('Y-m'));
 
-    // Ambil transaksi sesuai bulan
-    $data = Transaksi::where('created_at', 'like', $bulan . '%')
-        ->orderBy('created_at', 'DESC')
-        ->get();
+        $data = Transaksi::whereRaw('DATE_FORMAT(created_at, "%Y-%m") = ?', [$bulan])
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
-    // Cek apakah ada data di bulan tersebut
-    $adaData = $data->count() > 0;
+        $adaData = $data->count() > 0;
 
-    return view('laporan.transaksi', compact('data', 'bulan', 'adaData'));
-}
-
+        return view('laporan.transaksi', compact('data', 'bulan', 'adaData'));
+    }
 }

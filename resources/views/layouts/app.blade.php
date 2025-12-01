@@ -232,7 +232,7 @@
     </style>
 </head>
 
-<body class="{{ auth()->user()->settings['theme'] ?? 'light' === 'dark' ? 'bg-dark' : '' }}">
+<body class="bg-dark">
     <div class="overlay" id="overlay"></div>
 
     <!-- Sidebar -->
