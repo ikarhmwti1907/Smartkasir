@@ -8,15 +8,30 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('username')->unique()->after('name');
-            $table->string('avatar')->nullable()->after('email');
+            $existing = Schema::getColumnListing('users');
+
+            if (!in_array('username', $existing)) {
+                $table->string('username')->unique()->after('name');
+            }
+
+            if (!in_array('avatar', $existing)) {
+                $table->string('avatar')->nullable()->after('email');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['username', 'avatar']);
+            $existing = Schema::getColumnListing('users');
+
+            if (in_array('username', $existing)) {
+                $table->dropColumn('username');
+            }
+
+            if (in_array('avatar', $existing)) {
+                $table->dropColumn('avatar');
+            }
         });
     }
 };
