@@ -229,6 +229,15 @@
     body.bg-dark .navbar a {
         color: #fff !important;
     }
+
+    /* FIX: Modal harus muncul di depan sidebar */
+    .modal {
+        z-index: 2000 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 1999 !important;
+    }
     </style>
 </head>
 
